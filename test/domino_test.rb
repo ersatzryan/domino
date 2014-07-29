@@ -14,27 +14,27 @@ class TestApplication
           <body>
             <h1>Here are people and animals</h1>
             <div id='people'>
-              <div class='person'>
+              <div class='person woman'>
                 <h2 class='name'>Alice</h2>
                 <p class='last-name'>Cooper</p>
                 <p class='bio'>Alice is fun</p>
                 <p class='fav-color'>Blue</p>
                 <p class='age'>23</p>
               </div>
-              <div class='person'>
+              <div class='person man'>
                 <h2 class='name'>Bob</h2>
                 <p class='last-name'>Marley</p>
                 <p class='bio'>Bob is smart</p>
                 <p class='fav-color'>Red</p>
                 <p class='age'>52</p>
               </div>
-              <div class='person'>
+              <div class='person man'>
                 <h2 class='name'>Charlie</h2>
                 <p class='last-name'>Murphy</p>
                 <p class='bio'>Charlie is wild</p>
                 <p class='fav-color'>Red</p>
               </div>
-              <div class='person'>
+              <div class='person woman'>
                 <h2 class='name'>Donna</h2>
                 <p class='last-name'>Summer</p>
                 <p class='bio'>Donna is quiet</p>
@@ -62,9 +62,13 @@ class DominoTest < MiniTest::Unit::TestCase
       attribute :last_name
       attribute :biography, '.bio'
       attribute :favorite_color, '.fav-color'
-      attribute :age do |text|
-        text.to_i
-      end
+      attribute :age, &:to_i
+    end
+
+    class Woman < Person
+      selector ".woman"
+
+      attribute :foo
     end
 
     class Animal < Domino
@@ -142,6 +146,14 @@ class DominoTest < MiniTest::Unit::TestCase
 
   def test_callback
     assert_equal 23, Dom::Person.find_by_name("Alice").age
+  end
+
+  def test_subclass_callbacks
+    assert_equal 23, Dom::Woman.first.age
+  end
+
+  def test_subclass_attributes
+    assert_equal Dom::Person.attributes + [:foo], Dom::Woman.attributes
   end
 
   def test_find_bang

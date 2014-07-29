@@ -83,11 +83,18 @@ class Domino
     end
 
     def attributes
-      @attributes ||= []
+      @_attributes ||= []
     end
+    attr_writer :_attributes
 
-    def callbacks
-      @callbacks ||= {}
+    def _callbacks
+      @_callbacks ||= {}
+    end
+    attr_writer :_callbacks
+
+    def inherited(subclass)
+      subclass._callbacks = _callbacks.dup
+      subclass._attributes = attributes.dup
     end
 
     # Define an attribute for this Domino
@@ -107,15 +114,15 @@ class Domino
     #   Dom::Post.find_by_title(/^First/)
     def attribute(attribute, selector = nil, &callback)
       attributes << attribute
-      callbacks[attribute] = callback
+      _callbacks[attribute] = callback
 
       selector ||= %{.#{attribute.to_s.gsub("_", "-")}}
 
       class_eval %{
         def #{attribute}
           value = attribute(%{#{selector}})
-          if value && self.class.callbacks[:#{attribute}].is_a?(Proc)
-            self.class.callbacks[:#{attribute}].call(value)
+          if value && self.class._callbacks[:#{attribute}].is_a?(Proc)
+            self.class._callbacks[:#{attribute}].call(value)
           else
             value
           end
